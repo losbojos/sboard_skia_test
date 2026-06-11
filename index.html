@@ -8,9 +8,22 @@
   </head>
   <body>
     <h1>sBoard Skia Test</h1>
-    <div id="app">
-      <div id="pixi-root"></div>      
-    </div>
+    <header class="">
+      <div class="controls">
+        <button id="btn-random-shape" class="btn" type="button">Сгенерировать случайную фигуру</button>
+        <button id="btn-export-pdf" class="btn" type="button">Экспорт в PDF</button>
+      </div>
+    </header>
+    <main class="main">
+      <section class="canvas-panel">
+        <h2>Pixi</h2>
+        <div id="pixi-root"></div>
+      </section>
+      <section class="canvas-panel">
+        <h2>Skia</h2>
+        <div id="skia-root"></div>
+      </section>
+    </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
