@@ -28,7 +28,7 @@ export class RectImageShapeBuilder implements IShapeBuilder {
       ),
     )
 
-    const sprite = new Sprite(this.textureFactory.create(width, height, color))
+    const sprite = new Sprite(this.textureFactory.create(width, height, color, context.random))
     sprite.anchor.set(0.5)
     sprite.position.set(
       context.random.nextNumberInRange(0, context.bounds.width),

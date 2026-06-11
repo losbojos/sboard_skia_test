@@ -30,4 +30,7 @@ export const RANDOM_SHAPE_RANGES = {
 export const RECT_IMAGE_TEXTURE_STYLE = {
   strokeColor: 'rgba(0, 0, 0, 0.35)',
   strokeWidth: 2,
+  brightnessShift: 40,
+  circleCount: { min: 3, max: 7 },
+  circleRadius: { min: 6, max: 18 },
 } as const
