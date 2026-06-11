@@ -10,10 +10,15 @@ export class ControlsBinder {
 
   bind(): void {
     const randomShapeButton = this.requireButton(DOM_IDS.randomShapeButton)
+    const clearCanvasButton = this.requireButton(DOM_IDS.clearCanvasButton)
     const exportPdfButton = this.requireButton(DOM_IDS.exportPdfButton)
 
     randomShapeButton.addEventListener('click', () => {
       this.actions.onRandomShape()
+    })
+
+    clearCanvasButton.addEventListener('click', () => {
+      this.actions.onClearCanvas()
     })
 
     exportPdfButton.addEventListener('click', () => {

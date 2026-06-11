@@ -34,8 +34,23 @@ export class App {
       onRandomShape: () => {
         this.randomShapeFactory.createAndAddTo(pixiApp.stage)
       },
+      onClearCanvas: () => {
+        this.clearPixiStage(pixiApp)
+        this.clearSkiaCanvas(skiaCanvas)
+      },
       onExportPdf: () => this.pdfExporter.export(),
     }).bind()
+  }
+
+  private clearPixiStage(pixiApp: Application): void {
+    pixiApp.stage.removeChildren().forEach((child) => {
+      child.destroy({ children: true })
+    })
+  }
+
+  private clearSkiaCanvas(canvas: HTMLCanvasElement): void {
+    const context = canvas.getContext('2d')
+    context?.clearRect(0, 0, canvas.width, canvas.height)
   }
 
   private createPixiApp(): Application {
