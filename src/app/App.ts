@@ -6,6 +6,7 @@ import { CanvasSizeCalculator } from '../core/CanvasSizeCalculator.ts'
 import { ColorConverter } from '../core/ColorConverter.ts'
 import { MathRandomProvider } from '../core/MathRandomProvider.ts'
 import { PdfExporterStub } from '../pdf/PdfExporterStub.ts'
+import { createDemoScene } from '../pixi/createDemoScene.ts'
 import { RandomShapeFactory } from '../pixi/shapes/RandomShapeFactory.ts'
 import { ControlsBinder } from '../ui/ControlsBinder.ts'
 import type { IPdfExporter } from '../pdf/IPdfExporter.ts'
@@ -29,6 +30,8 @@ export class App {
 
     this.mountCanvas(pixiRoot, pixiApp.view as HTMLCanvasElement)
     this.mountCanvas(skiaRoot, skiaCanvas)
+
+    pixiApp.stage.addChild(createDemoScene(this.canvasSize))
 
     new ControlsBinder({
       onRandomShape: () => {
