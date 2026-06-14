@@ -3,13 +3,15 @@ import { CANVAS_BACKGROUND_COLOR, type CanvasSize } from '../config/canvas.confi
 import { DOM_IDS } from '../config/dom.config.ts'
 import { PIXI_APP_OPTIONS } from '../config/pixi.config.ts'
 import { CanvasSizeCalculator } from '../core/CanvasSizeCalculator.ts'
-import { ColorConverter } from '../core/ColorConverter.ts'
 import { MathRandomProvider } from '../core/MathRandomProvider.ts'
 import { PdfExporterStub } from '../pdf/PdfExporterStub.ts'
 import { createDemoScene } from '../pixi/createDemoScene.ts'
 import { RandomShapeFactory } from '../pixi/shapes/RandomShapeFactory.ts'
 import { ControlsBinder } from '../ui/ControlsBinder.ts'
 import type { IPdfExporter } from '../pdf/IPdfExporter.ts'
+
+import { loadCanvasKit } from '../skia/CanvasKitLoader.ts'
+import { SkiaRenderer } from '../skia/SkiaRenderer.ts'
 
 export class App {
   private readonly canvasSize: CanvasSize
@@ -21,17 +23,18 @@ export class App {
     this.randomShapeFactory = new RandomShapeFactory(new MathRandomProvider(), this.canvasSize)
   }
 
-  run(): void {
+  async run(): Promise<void> {
     const pixiRoot = this.requireElement(DOM_IDS.pixiRoot)
-    const skiaRoot = this.requireElement(DOM_IDS.skiaRoot)
-
     const pixiApp = this.createPixiApp()
-    const skiaCanvas = this.createSkiaCanvas()
-
     this.mountCanvas(pixiRoot, pixiApp.view as HTMLCanvasElement)
-    this.mountCanvas(skiaRoot, skiaCanvas)
-
     pixiApp.stage.addChild(createDemoScene(this.canvasSize))
+
+    const skiaRoot = this.requireElement(DOM_IDS.skiaRoot)
+    const skiaCanvas = this.createSkiaCanvas()
+    this.mountCanvas(skiaRoot, skiaCanvas)
+    const canvasKit = await loadCanvasKit()
+    const skiaRenderer = new SkiaRenderer(canvasKit, skiaCanvas)
+    skiaRenderer.drawTestScene()    
 
     new ControlsBinder({
       onRandomShape: () => {
@@ -39,10 +42,12 @@ export class App {
       },
       onClearCanvas: () => {
         this.clearPixiStage(pixiApp)
-        this.clearSkiaCanvas(skiaCanvas)
+        //this.clearSkiaCanvas(skiaCanvas)
+        skiaRenderer.clear();
       },
       onExportPdf: () => this.pdfExporter.export(),
     }).bind()
+
   }
 
   private clearPixiStage(pixiApp: Application): void {
@@ -51,10 +56,12 @@ export class App {
     })
   }
 
+  /*
   private clearSkiaCanvas(canvas: HTMLCanvasElement): void {
     const context = canvas.getContext('2d')
     context?.clearRect(0, 0, canvas.width, canvas.height)
   }
+    */
 
   private createPixiApp(): Application {
     return new Application({
@@ -71,7 +78,8 @@ export class App {
     canvas.width = this.canvasSize.width
     canvas.height = this.canvasSize.height
     canvas.className = 'skia-canvas'
-    canvas.style.backgroundColor = ColorConverter.toCssHex(CANVAS_BACKGROUND_COLOR)
+    // import { ColorConverter } from '../core/ColorConverter.ts'
+    // canvas.style.backgroundColor = ColorConverter.toCssHex(CANVAS_BACKGROUND_COLOR)
 
     return canvas
   }
