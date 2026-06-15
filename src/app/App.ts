@@ -6,6 +6,7 @@ import { CanvasSizeCalculator } from '../core/CanvasSizeCalculator.ts'
 import { MathRandomProvider } from '../core/MathRandomProvider.ts'
 import { PdfExporterStub } from '../pdf/PdfExporterStub.ts'
 import { createDemoScene } from '../pixi/createDemoScene.ts'
+import { StagePointerBinder } from '../pixi/StagePointerBinder.ts'
 import { RandomShapeFactory } from '../pixi/shapes/RandomShapeFactory.ts'
 import { ControlsBinder } from '../ui/ControlsBinder.ts'
 import type { IPdfExporter } from '../pdf/IPdfExporter.ts'
@@ -28,6 +29,7 @@ export class App {
     const pixiApp = this.createPixiApp()
     this.mountCanvas(pixiRoot, pixiApp.view as HTMLCanvasElement)
     pixiApp.stage.addChild(createDemoScene(this.canvasSize))
+    new StagePointerBinder().bind(pixiApp.stage)
 
     const skiaRoot = this.requireElement(DOM_IDS.skiaRoot)
     const skiaCanvas = this.createSkiaCanvas()

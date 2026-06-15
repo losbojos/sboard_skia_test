@@ -1,5 +1,6 @@
 import type { Graphics } from 'pixi.js-legacy'
 import { RANDOM_SHAPE_RANGES } from '../../config/random-shape.config.ts'
+import { drawLineSegment } from '../drawLineSegment.ts'
 import { AbstractGraphicsShapeBuilder } from './AbstractGraphicsShapeBuilder.ts'
 import type { ShapeBuildContext } from './ShapeBuildContext.ts'
 import { ShapeType } from './ShapeType.ts'
@@ -21,9 +22,15 @@ export class LineShapeBuilder extends AbstractGraphicsShapeBuilder {
       RANDOM_SHAPE_RANGES.line.width.max,
     )
 
-    graphics
-      .lineStyle(lineWidth, color, RANDOM_SHAPE_RANGES.line.alpha)
-      .moveTo(0, 0)
-      .lineTo(endX, endY)
+    drawLineSegment({
+      graphics,
+      x1: 0,
+      y1: 0,
+      x2: endX,
+      y2: endY,
+      lineWidth,
+      color,
+      alpha: RANDOM_SHAPE_RANGES.line.alpha,
+    })
   }
 }

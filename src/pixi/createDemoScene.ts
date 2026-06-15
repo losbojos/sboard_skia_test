@@ -1,5 +1,6 @@
 import { Container, Graphics, Sprite, Text, Texture } from 'pixi.js-legacy'
 import type { CanvasSize } from '../config/canvas.config.ts'
+import { drawLineSegment } from './drawLineSegment.ts'
 import picExampleUrl from '../assets/pic-example.png'
 
 function regularPolygon(sides: number, radius: number): number[] {
@@ -42,7 +43,15 @@ export function createDemoScene(bounds: CanvasSize): Container {
   scene.addChild(hexagon)
 
   const line = new Graphics()
-  line.lineStyle(6, 0xf39c12, 1).moveTo(0, 50).lineTo(120, -50)
+  drawLineSegment({
+    graphics: line,
+    x1: 0,
+    y1: 50,
+    x2: 120,
+    y2: -50,
+    lineWidth: 6,
+    color: 0xf39c12,
+  })
   line.position.set(width * 0.3, height * 0.6)
   scene.addChild(line)
 
