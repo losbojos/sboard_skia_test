@@ -1,54 +1,107 @@
 # sBoard Skia Test
 
-TypeScript-приложение, объединяющее **PixiJS** и **Skia**: рендер `PIXI.Container` через Skia с экспортом сцены в векторный PDF.
+TypeScript-приложение: рендер сцены **PixiJS** и её отображение через **Skia (CanvasKit WASM)** на двух канвасах.
+
+**Демо:** [https://losbojos.github.io/sboard_skia_test/](https://losbojos.github.io/sboard_skia_test/)
 
 ## Описание
 
-Проект реализует собственную обёртку для отрисовки Pixi-контейнера с помощью Skia и позволяет экспортировать результат в PDF через Skia PDF backend. Приложение включает два канваса (Pixi и Skia), поддержку pointer-событий и простой UI для тестирования.
+Pixi хранит сцену (`PIXI.Container` с фигурами и спрайтами). Skia-канвас — зеркало той же сцены: конвертер обходит дерево Pixi и рисует векторную графику и растровые спрайты с учётом `worldTransform`.
 
 ## Возможности
 
-- **Skia-обёртка** — конвертация `PIXI.Container` в Skia-сцену с учётом трансформаций (translate, rotate, scale)
-- **Поддерживаемые объекты:**
-  - `PIXI.Graphics` — `drawShape`, `moveTo`, `lineTo`, `drawRect`, заливки и обводки
-  - `PIXI.Sprite` — PNG-изображения
-- **Экспорт в PDF** — векторная графика (не растровое изображение внутри PDF)
-- **Интерактивность** — события `pointerDown` и `pointerUp` на обоих канвасах
-- **UI** — кнопки управления, просмотр сцены, экспорт в PDF
+| Функция | Статус |
+|---------|--------|
+| Pixi → Skia конвертер (`Graphics`, `Sprite`, трансформации) | ✅ |
+| Два канваса, синхронизация при старте и добавлении фигур | ✅ |
+| Демо-сцена и генерация случайных фигур | ✅ |
+| `pointerdown` / `pointerup` на Pixi-канвасе | ✅ |
+| `pointerdown` / `pointerup` на Skia-канвасе (hit-test через Pixi) | ✅ |
+| Выделение красной рамкой (независимо на каждом канвасе) | ✅ |
+| Экспорт в векторный PDF | ⏳ заглушка |
+
+### Поддерживаемые объекты Pixi
+
+- **Graphics** — прямоугольники, эллипсы, многоугольники, линии; заливка и обводка
+- **Sprite** — PNG и растровые текстуры (в т.ч. `Text` как растр в Pixi v7)
+
+### Ограничения
+
+- Текст рисуется в Skia как **растровый** спрайт, не векторный шрифт
+- Hit-test на Skia-канвасе использует сцену Pixi (отдельного дерева объектов в Skia нет)
+- PDF-экспорт пока не реализован (`PdfExporterStub`)
 
 ## Технологии
 
-| Компонент | Версия / описание |
-|-----------|-------------------|
-| TypeScript | — |
+| Компонент | Версия |
+|-----------|--------|
+| TypeScript | ~6.0 |
+| Vite | ^8 |
 | PixiJS | `7.2.4-legacy`, `forceCanvas: true` |
-| Skia | WASM, PDF backend |
-| UI | HTML / CSS |
+| Skia | `canvaskit-wasm` ^0.41 |
 
-## Архитектура (план)
+## Структура проекта
 
 ```
 src/
-├── pixi/          # Сцена Pixi, контейнеры, интерактивность
-├── skia/          # Обёртка Skia, рендер Pixi → Skia
-├── pdf/           # Экспорт в векторный PDF
-└── ui/            # HTML/CSS интерфейс
+├── app/           # Сборка приложения
+├── config/        # Конфигурация канваса, Pixi, UI
+├── core/          # Утилиты (цвета, размер канваса, рамка выделения)
+├── pixi/          # Сцена, фигуры, pointer-события Pixi
+├── skia/          # CanvasKit, конвертер Pixi → Skia, pointer Skia
+├── pdf/           # Интерфейс экспорта PDF (заглушка)
+└── ui/            # Привязка кнопок
 ```
 
-## Запуск
+## Локальный запуск
 
-> Инструкция будет дополнена после инициализации проекта.
+Требуется Node.js 20+.
 
 ```bash
 npm install
-npm run dev      # режим разработки
-npm run build    # сборка
-npm run preview  # просмотр production-сборки
+npm run dev
 ```
 
-## Сборка Skia WASM
+Откройте адрес из консоли (обычно `http://localhost:5173`).
 
-> Для PDF-экспорта потребуется скомпилировать Skia в WASM. Подробные шаги будут добавлены на этапе реализации.
+### Сборка
+
+```bash
+npm run build
+npm run preview   # просмотр production-сборки локально (base: /)
+```
+
+## Деплой на GitHub Pages
+
+Сайт: `https://losbojos.github.io/sboard_skia_test/`
+
+`vite.config.ts` задаёт `base: '/sboard_skia_test/'` при `GITHUB_PAGES=true` (см. [workflow](.github/workflows/deploy.yml)).
+
+При push в `main` срабатывает [GitHub Actions](.github/workflows/deploy.yml): сборка и публикация `dist/`.
+
+**Первоначальная настройка (один раз):**
+
+1. **Settings** → **Pages**
+2. **Build and deployment** → Source: **GitHub Actions**
+3. Push в `main` — дождаться зелёного workflow в **Actions**
+
+Проверка сборки под Pages локально:
+
+```bash
+# PowerShell
+$env:GITHUB_PAGES='true'; npm run build; npm run preview
+
+# bash
+GITHUB_PAGES=true npm run build && npm run preview
+```
+
+## Скрипты npm
+
+| Команда | Описание |
+|---------|----------|
+| `npm run dev` | Режим разработки |
+| `npm run build` | TypeScript + production-сборка |
+| `npm run preview` | Локальный просмотр `dist/` |
 
 ## Лицензия
 
