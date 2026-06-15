@@ -13,6 +13,7 @@ import type { IPdfExporter } from '../pdf/IPdfExporter.ts'
 
 import { loadCanvasKit } from '../skia/CanvasKitLoader.ts'
 import { SkiaRenderer } from '../skia/SkiaRenderer.ts'
+import { SkiaCanvasPointerBinder } from '../skia/SkiaCanvasPointerBinder.ts'
 
 export class App {
   private readonly canvasSize: CanvasSize
@@ -43,6 +44,8 @@ export class App {
     }
 
     syncSkiaFromPixi()
+
+    new SkiaCanvasPointerBinder(skiaCanvas, pixiApp, skiaRenderer).bind()
 
     new ControlsBinder({
       onRandomShape: () => {

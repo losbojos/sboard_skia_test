@@ -79,4 +79,5 @@ h2 {
 #skia-root canvas {
   display: block;
   border: 1px solid #ccc;
+  touch-action: none;
 }

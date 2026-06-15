@@ -1,8 +1,5 @@
 import { Container, DisplayObject, Graphics, type FederatedPointerEvent } from 'pixi.js-legacy'
-
-const HIGHLIGHT_BORDER_COLOR = 0xff0000
-const HIGHLIGHT_BORDER_WIDTH = 2
-const HIGHLIGHT_BORDER_PADDING = 3
+import { HIGHLIGHT_BORDER, getPaddedHighlightRect } from '../core/HighlightBorder.ts'
 
 export class StagePointerBinder {
   private highlightedTarget: Container | null = null
@@ -20,27 +17,30 @@ export class StagePointerBinder {
       const target = event.target
       if (target === stage || !(target instanceof Container)) return
 
-      console.log('Pointer down on:', target)
-      this.applyHighlight(target)
+      this.handlePointerDown(target)
     })
 
-    stage.on('pointerup', () => this.clearHighlight())
-    stage.on('pointerupoutside', () => this.clearHighlight())
+    stage.on('pointerup', () => this.handlePointerUp())
+    stage.on('pointerupoutside', () => this.handlePointerUp())
+  }
+
+  handlePointerDown(target: Container): void {
+    console.log('Pointer down on:', target)
+    this.applyHighlight(target)
+  }
+
+  handlePointerUp(): void {
+    this.clearHighlight()
   }
 
   private applyHighlight(target: Container): void {
     this.clearHighlight()
 
-    const bounds = target.getLocalBounds()
+    const rect = getPaddedHighlightRect(target.getLocalBounds())
     const border = new Graphics()
     border.eventMode = 'none'
-    border.lineStyle(HIGHLIGHT_BORDER_WIDTH, HIGHLIGHT_BORDER_COLOR, 1)
-    border.drawRect(
-      bounds.x - HIGHLIGHT_BORDER_PADDING,
-      bounds.y - HIGHLIGHT_BORDER_PADDING,
-      bounds.width + HIGHLIGHT_BORDER_PADDING * 2,
-      bounds.height + HIGHLIGHT_BORDER_PADDING * 2,
-    )
+    border.lineStyle(HIGHLIGHT_BORDER.width, HIGHLIGHT_BORDER.color, HIGHLIGHT_BORDER.alpha)
+    border.drawRect(rect.x, rect.y, rect.width, rect.height)
 
     target.addChild(border)
     this.highlightedTarget = target

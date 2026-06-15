@@ -13,6 +13,7 @@ import {
   type RoundedRectangle,
 } from 'pixi.js-legacy'
 import { ColorConverter } from '../core/ColorConverter.ts'
+import { applyPixiWorldTransform } from './applyPixiWorldTransform.ts'
 
 const imageCache = new Map<number, Image>()
 
@@ -58,25 +59,9 @@ function drawWithWorldTransform<T extends DisplayObject>(
   drawFunc: (obj: T, canvasKit: CanvasKit, skCanvas: Canvas) => void,
 ): void {
   skCanvas.save()
-  applyWorldTransform(skCanvas, obj)
+  applyPixiWorldTransform(skCanvas, obj)
   drawFunc(obj, canvasKit, skCanvas)
   skCanvas.restore()
-}
-
-function applyWorldTransform(skCanvas: Canvas, obj: DisplayObject): void {
-  const matrix = obj.worldTransform
-
-  skCanvas.concat([
-    matrix.a,
-    matrix.c,
-    matrix.tx,
-    matrix.b,
-    matrix.d,
-    matrix.ty,
-    0,
-    0,
-    1,
-  ])
 }
 
 function convertGraphics(
