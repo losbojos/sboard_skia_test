@@ -34,16 +34,22 @@ export class App {
     this.mountCanvas(skiaRoot, skiaCanvas)
     const canvasKit = await loadCanvasKit()
     const skiaRenderer = new SkiaRenderer(canvasKit, skiaCanvas)
-    skiaRenderer.drawTestScene()    
+
+    const syncSkiaFromPixi = (): void => {
+      pixiApp.renderer.render(pixiApp.stage)
+      skiaRenderer.renderFromPixi(pixiApp.stage)
+    }
+
+    syncSkiaFromPixi()
 
     new ControlsBinder({
       onRandomShape: () => {
         this.randomShapeFactory.createAndAddTo(pixiApp.stage)
+        syncSkiaFromPixi()
       },
       onClearCanvas: () => {
         this.clearPixiStage(pixiApp)
-        //this.clearSkiaCanvas(skiaCanvas)
-        skiaRenderer.clear();
+        skiaRenderer.clear()
       },
       onExportPdf: () => this.pdfExporter.export(),
     }).bind()
@@ -55,13 +61,6 @@ export class App {
       child.destroy({ children: true })
     })
   }
-
-  /*
-  private clearSkiaCanvas(canvas: HTMLCanvasElement): void {
-    const context = canvas.getContext('2d')
-    context?.clearRect(0, 0, canvas.width, canvas.height)
-  }
-    */
 
   private createPixiApp(): Application {
     return new Application({
